@@ -14,34 +14,26 @@ void roundThisToInterval(
     roundThis = round(roundThis / interval) * interval;
 }
 
-// The following three functions turn the pitch yaw roll you input, into mat3 values
-double funcSin(
+double degToRad(
     double degree
 )
 {
-    return sin(degree * M_PI / 180);
+    return (degree * M_PI / 180);
 }
 
-double funcCos(
-    double degree
-)
-{
-    return cos(degree * M_PI / 180);
-}
-
+// Turns the pitch, yaw, and roll that you input, into mat3 values
 std::vector<double> angle_to_mat3(
     double pitch,
     double yaw,
     double roll
 )
 {
-
-    double sy = funcSin(yaw);
-    double cy = funcCos(yaw);
-    double sp = funcSin(pitch);
-    double cp = funcCos(pitch);
-    double sr = funcSin(roll);
-    double cr = funcCos(roll);
+    double sy = sin(degToRad(yaw));
+    double cy = cos(degToRad(yaw));
+    double sp = sin(degToRad(pitch));
+    double cp = cos(degToRad(pitch));
+    double sr = sin(degToRad(roll));
+    double cr = cos(degToRad(roll));
 
     double mat0X = cp * cy;
     double mat0Y = cp * sy;
@@ -73,7 +65,7 @@ std::vector<double> stringToVector(
     return vectorized;
 }
 
-// Specify a string, what to replace, and its replacement
+// Specify a string, the item to replace, and its replacement
 void replaceThisInString(
     std::string & stringThing,
     std::string replaceThis,
@@ -81,24 +73,36 @@ void replaceThisInString(
 )
 {
     size_t startPoint = stringThing.find(replaceThis);
-    stringThing.replace(startPoint, replaceThis.length(), replacement);
+    size_t endPoint = replaceThis.length();
+    stringThing.replace(startPoint, endPoint, replacement);
+}
+
+// Takes the given text file and turns its contents to a vector
+std::vector<std::string> textFileToVector(
+    std::string filePath
+)
+{
+    std::ifstream textTemplate(filePath);
+    std::vector<std::string> makeVector;
+    for (std::string currentLine; std::getline(textTemplate, currentLine);)
+    {
+        makeVector.push_back(currentLine);
+    }
+    return makeVector;
 }
 
 int main()
 {
-    // Get the template and feed its lines into a vector
-    std::ifstream textTemplate("template.txt");
-    std::vector<std::string> templateVector;
-    for (std::string currentLine; std::getline(textTemplate, currentLine);)
-    {
-        templateVector.push_back(currentLine);
-    }
+    // Get the template and turn it into a vector
+    static const std::vector<std::string> templateVector = textFileToVector("template.txt");
+
+    std::cout << "Angles should be input in the format pitch yaw roll, exe. 0 90 0\nThe fourth value from where is yaw, the fifth is pitch.\nPitch is looking up/down, yaw is looking left/right, roll is leaning left/right.\n";
 
     while (true)
     {
         // Get pitch yaw roll from user
         std::string* inputStr = new std::string;
-        std::cout << "\nInput the pitch, yaw, and roll (ex. 0 90 0)\n";
+        std::cout << "\nInput the pitch, yaw, and roll\n";
         std::getline(std::cin, *inputStr);
         std::cout << "\n";
 
@@ -116,6 +120,9 @@ int main()
 
         // Replace the placeholders from the template with the real mat3 values we calculated
         // (the mat3 values need to be converted to strings for the replacement to work)
+        replaceThisInString((*generatedEntity).at(0), "PITCH", std::to_string((*pitchYawRoll).at(0)));
+        replaceThisInString((*generatedEntity).at(0), "YAW", std::to_string((*pitchYawRoll).at(1)));
+        replaceThisInString((*generatedEntity).at(0), "ROLL", std::to_string((*pitchYawRoll).at(2)));
         replaceThisInString((*generatedEntity).at(3), "MAT0X", std::to_string((*spawnOrientation).at(0)));
         replaceThisInString((*generatedEntity).at(4), "MAT0Y", std::to_string((*spawnOrientation).at(1)));
         replaceThisInString((*generatedEntity).at(5), "MAT0Z", std::to_string((*spawnOrientation).at(2)));

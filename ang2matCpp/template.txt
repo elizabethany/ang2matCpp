@@ -1,4 +1,4 @@
-spawnOrientation = {
+spawnOrientation = { // PITCH YAW ROLL
             mat = {
                 mat[0] = {
                     x = MAT0X;
